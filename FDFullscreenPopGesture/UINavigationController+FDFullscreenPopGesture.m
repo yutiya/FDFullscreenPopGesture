@@ -267,6 +267,16 @@ typedef void (^_FDViewControllerWillAppearInjectBlock)(UIViewController *viewCon
 - (void)setFd_prefersNavigationBarHidden:(BOOL)hidden
 {
     objc_setAssociatedObject(self, @selector(fd_prefersNavigationBarHidden), @(hidden), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    if (hidden && !self.fd_willAppearInjectBlock &&
+        self.navigationController &&
+        self == self.navigationController.viewControllers.firstObject) {
+        _FDViewControllerWillAppearInjectBlock block = ^(UIViewController *viewController, BOOL animated) {
+            if (viewController) {
+                [viewController.navigationController setNavigationBarHidden:viewController.fd_prefersNavigationBarHidden animated:animated];
+            }
+        };
+        self.fd_willAppearInjectBlock = block;
+    }
 }
 
 
